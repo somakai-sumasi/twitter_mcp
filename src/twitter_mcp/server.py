@@ -1,0 +1,151 @@
+import json
+import os
+from contextlib import asynccontextmanager
+from pathlib import Path
+
+from mcp.server.fastmcp import FastMCP, Context
+from twikit import Client
+
+from twitter_mcp.config import settings
+
+COOKIES_PATH = str(Path(__file__).resolve().parent.parent.parent / "cookies.json")
+
+
+def _load_cookies(path: str) -> dict:
+    """ブラウザエクスポート形式(list)とtwikit形式(dict)の両方に対応"""
+    with open(path) as f:
+        data = json.load(f)
+    if isinstance(data, list):
+        return {
+            c["name"]: c["value"]
+            for c in data
+            if ".x.com" in c.get("domain", "") or "x.com" in c.get("domain", "")
+        }
+    return data
+
+
+def _format_tweet(tweet) -> dict:
+    result = {
+        "id": tweet.id,
+        "text": getattr(tweet, "text", "") or getattr(tweet, "full_text", ""),
+        "created_at": getattr(tweet, "created_at", None),
+        "favorite_count": getattr(tweet, "favorite_count", 0),
+        "retweet_count": getattr(tweet, "retweet_count", 0),
+        "reply_count": getattr(tweet, "reply_count", 0),
+        "view_count": getattr(tweet, "view_count", None),
+    }
+    if hasattr(tweet, "user") and tweet.user:
+        result["user"] = {
+            "id": tweet.user.id,
+            "name": tweet.user.name,
+            "screen_name": tweet.user.screen_name,
+        }
+    return result
+
+
+def _format_user(user) -> dict:
+    return {
+        "id": user.id,
+        "name": user.name,
+        "screen_name": user.screen_name,
+        "description": getattr(user, "description", ""),
+        "location": getattr(user, "location", ""),
+        "followers_count": getattr(user, "followers_count", 0),
+        "following_count": getattr(user, "following_count", 0),
+        "statuses_count": getattr(user, "statuses_count", 0),
+        "favourites_count": getattr(user, "favourites_count", 0),
+        "verified": getattr(user, "verified", False),
+        "is_blue_verified": getattr(user, "is_blue_verified", False),
+        "profile_image_url": getattr(user, "profile_image_url", ""),
+        "created_at": getattr(user, "created_at", ""),
+    }
+
+
+@asynccontextmanager
+async def lifespan(server):
+    client = Client("ja")
+    if os.path.exists(COOKIES_PATH):
+        client.set_cookies(_load_cookies(COOKIES_PATH))
+    else:
+        await client.login(
+            auth_info_1=settings.TWITTER_USERNAME,
+            auth_info_2=settings.TWITTER_EMAIL,
+            password=settings.TWITTER_PASSWORD,
+        )
+        client.save_cookies(COOKIES_PATH)
+    yield {"client": client}
+
+
+mcp = FastMCP("twitter-mcp", lifespan=lifespan)
+
+
+def _get_client(ctx: Context) -> Client:
+    return ctx.request_context.lifespan_context["client"]
+
+
+@mcp.tool()
+async def search_tweets(
+    ctx: Context,
+    query: str,
+    product: str = "Top",
+    count: int = 20,
+) -> str:
+    """キーワードでツイートを検索する。productはTop/Latest/Mediaから選択。"""
+    client = _get_client(ctx)
+    results = await client.search_tweet(query, product, count=count)
+    return json.dumps([_format_tweet(t) for t in results], ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+async def get_user_info(ctx: Context, screen_name: str) -> str:
+    """ユーザー名（@なし）からプロフィール情報を取得する。"""
+    client = _get_client(ctx)
+    user = await client.get_user_by_screen_name(screen_name)
+    return json.dumps(_format_user(user), ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+async def get_user_tweets(
+    ctx: Context,
+    user_id: str,
+    tweet_type: str = "Tweets",
+    count: int = 20,
+) -> str:
+    """ユーザーIDを指定してツイート一覧を取得する。tweet_typeはTweets/Replies/Media/Likesから選択。"""
+    client = _get_client(ctx)
+    results = await client.get_user_tweets(user_id, tweet_type, count=count)
+    return json.dumps([_format_tweet(t) for t in results], ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+async def get_tweet(ctx: Context, tweet_id: str) -> str:
+    """ツイートIDを指定して1件のツイートを取得する。"""
+    client = _get_client(ctx)
+    tweet = await client.get_tweet_by_id(tweet_id)
+    return json.dumps(_format_tweet(tweet), ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+async def get_timeline(ctx: Context, count: int = 20) -> str:
+    """ホームタイムラインを取得する。"""
+    client = _get_client(ctx)
+    results = await client.get_timeline(count)
+    return json.dumps([_format_tweet(t) for t in results], ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+async def get_trends(ctx: Context, category: str = "trending") -> str:
+    """トレンドを取得する。categoryはtrending/for-you/news/sports/entertainmentから選択。"""
+    client = _get_client(ctx)
+    results = await client.get_trends(category)
+    trends = []
+    for t in results:
+        trends.append({
+            "name": getattr(t, "name", ""),
+            "tweet_count": getattr(t, "tweet_count", None),
+        })
+    return json.dumps(trends, ensure_ascii=False, indent=2)
+
+
+if __name__ == "__main__":
+    mcp.run()
