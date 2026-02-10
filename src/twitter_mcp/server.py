@@ -76,7 +76,16 @@ async def lifespan(server):
     yield {"client": client}
 
 
-mcp = FastMCP("twitter-mcp", lifespan=lifespan)
+mcp = FastMCP(
+    "twitter-mcp",
+    instructions=(
+        "Twitter/X コンテンツ取得の代替手段を提供する MCP サーバー。"
+        "AI ツールが Twitter/X の URL を直接 fetch すると認証・スクレイピング対策でブロックされるため、"
+        "認証済みセッションを経由してこの制約を回避する。"
+        "ツイート URL を渡された場合は ID を抽出し get_tweet で内容を取得できる。"
+    ),
+    lifespan=lifespan,
+)
 
 
 def _get_client(ctx: Context) -> Client:
