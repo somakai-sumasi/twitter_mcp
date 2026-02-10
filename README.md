@@ -1,29 +1,31 @@
 # Twitter MCP Server
 
-twikit を使った読み取り専用の Twitter MCP Server。Claude Code から Twitter の情報を取得できる。
+[日本語版はこちら](docs/README_ja.md)
 
-## セットアップ
+A read-only Twitter MCP Server using twikit. Retrieve Twitter data from Claude Code or Claude Desktop.
+
+## Setup
 
 ```bash
 cd <project-root>
 uv sync
 ```
 
-## 認証（cookies.json の準備）
+## Authentication (cookies.json)
 
-twikit のログインAPI は Cloudflare にブロックされるため、ブラウザから取得した cookie を使う。
+The twikit login API is blocked by Cloudflare, so browser cookies are used instead.
 
-ブラウザで x.com にログインし、cookie を JSON エクスポートしてプロジェクトルートに `cookies.json` として保存する。ブラウザエクスポート形式（配列）と twikit 形式（辞書）の両方に対応。
+Log in to x.com in your browser, export cookies as JSON, and save as `cookies.json` in the project root. Both browser export format (array) and twikit format (dict) are supported.
 
-## Claude Code への登録
+## Register with Claude Code
 
 ```bash
 claude mcp add twitter-mcp -- uv run --directory <project-root> python -m twitter_mcp.server
 ```
 
-## Claude Desktop への登録
+## Register with Claude Desktop
 
-`~/Library/Application Support/Claude/claude_desktop_config.json` の `mcpServers` に追加:
+Add to `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
@@ -34,20 +36,20 @@ claude mcp add twitter-mcp -- uv run --directory <project-root> python -m twitte
 }
 ```
 
-設定後 Claude Desktop を再起動で反映。
+Restart Claude Desktop to apply.
 
-## 利用可能なツール
+## Available Tools
 
-| ツール名          | 説明                     | 主なパラメータ                                               |
+| Tool              | Description              | Parameters                                                   |
 | ----------------- | ------------------------ | ------------------------------------------------------------ |
-| `search_tweets`   | キーワードでツイート検索 | `query`, `product`(Top/Latest/Media), `count`                |
-| `get_user_info`   | プロフィール取得         | `screen_name`                                                |
-| `get_user_tweets` | ユーザーのツイート一覧   | `user_id`, `tweet_type`(Tweets/Replies/Media/Likes), `count` |
-| `get_tweet`       | ツイート1件取得          | `tweet_id`                                                   |
-| `get_timeline`    | ホームタイムライン取得   | `count`                                                      |
-| `get_trends`      | トレンド取得             | `category`(trending/for-you/news/sports/entertainment)       |
+| `search_tweets`   | Search tweets by keyword | `query`, `product`(Top/Latest/Media), `count`                |
+| `get_user_info`   | Get user profile         | `screen_name`                                                |
+| `get_user_tweets` | Get user's tweets        | `user_id`, `tweet_type`(Tweets/Replies/Media/Likes), `count` |
+| `get_tweet`       | Get a single tweet       | `tweet_id`                                                   |
+| `get_timeline`    | Get home timeline        | `count`                                                      |
+| `get_trends`      | Get trends               | `category`(trending/for-you/news/sports/entertainment)       |
 
-## 動作確認
+## Test
 
 ```bash
 uv run python test_login.py
