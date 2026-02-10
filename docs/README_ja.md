@@ -38,14 +38,16 @@ claude mcp add twitter-mcp -- uv run --directory <project-root> python -m twitte
 
 ## 利用可能なツール
 
-| ツール名          | 説明                     | 主なパラメータ                                               |
-| ----------------- | ------------------------ | ------------------------------------------------------------ |
-| `search_tweets`   | キーワードでツイート検索 | `query`, `product`(Top/Latest/Media), `count`                |
-| `get_user_info`   | プロフィール取得         | `screen_name`                                                |
-| `get_user_tweets` | ユーザーのツイート一覧   | `user_id`, `tweet_type`(Tweets/Replies/Media/Likes), `count` |
-| `get_tweet`       | ツイート1件取得          | `tweet_id`                                                   |
-| `get_timeline`    | ホームタイムライン取得   | `count`                                                      |
-| `get_trends`      | トレンド取得             | `category`(trending/for-you/news/sports/entertainment)       |
+| ツール名              | 説明                         | 主なパラメータ                                               |
+| --------------------- | ---------------------------- | ------------------------------------------------------------ |
+| `search_tweets`       | キーワードでツイート検索     | `query`, `product`(Top/Latest/Media), `count`                |
+| `get_user_info`       | プロフィール取得             | `screen_name`                                                |
+| `get_user_tweets`     | ユーザーのツイート一覧       | `user_id`, `tweet_type`(Tweets/Replies/Media/Likes), `count` |
+| `get_tweet`           | ツイート1件取得              | `tweet_id`                                                   |
+| `get_tweet_replies`   | ツイートのリプライ一覧取得   | `tweet_id`, `count`                                          |
+| `get_timeline`        | ホームタイムライン取得       | `count`                                                      |
+| `get_latest_timeline` | 最新タイムライン取得（時系列）| `count`                                                      |
+| `get_trends`          | トレンド取得                 | `category`(trending/for-you/news/sports/entertainment)       |
 
 ## 動作確認
 

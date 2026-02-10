@@ -134,6 +134,32 @@ async def get_timeline(ctx: Context, count: int = 20) -> str:
 
 
 @mcp.tool()
+async def get_latest_timeline(ctx: Context, count: int = 20) -> str:
+    """フォロー中ユーザーの最新タイムラインを時系列順で取得する。"""
+    client = _get_client(ctx)
+    results = await client.get_latest_timeline(count)
+    return json.dumps([_format_tweet(t) for t in results], ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+async def get_tweet_replies(ctx: Context, tweet_id: str, count: int = 20) -> str:
+    """ツイートIDを指定してリプライ一覧を取得する。"""
+    client = _get_client(ctx)
+    tweet = await client.get_tweet_by_id(tweet_id)
+    replies = []
+    if hasattr(tweet, "replies") and tweet.replies is not None:
+        for i, reply in enumerate(tweet.replies):
+            if i >= count:
+                break
+            replies.append(_format_tweet(reply))
+    return json.dumps(
+        {"tweet": _format_tweet(tweet), "replies": replies},
+        ensure_ascii=False,
+        indent=2,
+    )
+
+
+@mcp.tool()
 async def get_trends(ctx: Context, category: str = "trending") -> str:
     """トレンドを取得する。categoryはtrending/for-you/news/sports/entertainmentから選択。"""
     client = _get_client(ctx)
@@ -143,6 +169,8 @@ async def get_trends(ctx: Context, category: str = "trending") -> str:
         trends.append({
             "name": getattr(t, "name", ""),
             "tweet_count": getattr(t, "tweet_count", None),
+            "domain_context": getattr(t, "domain_context", None),
+            "grouped_trends": getattr(t, "grouped_trends", None),
         })
     return json.dumps(trends, ensure_ascii=False, indent=2)
 

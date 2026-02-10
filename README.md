@@ -40,14 +40,16 @@ Restart Claude Desktop to apply.
 
 ## Available Tools
 
-| Tool              | Description              | Parameters                                                   |
-| ----------------- | ------------------------ | ------------------------------------------------------------ |
-| `search_tweets`   | Search tweets by keyword | `query`, `product`(Top/Latest/Media), `count`                |
-| `get_user_info`   | Get user profile         | `screen_name`                                                |
-| `get_user_tweets` | Get user's tweets        | `user_id`, `tweet_type`(Tweets/Replies/Media/Likes), `count` |
-| `get_tweet`       | Get a single tweet       | `tweet_id`                                                   |
-| `get_timeline`    | Get home timeline        | `count`                                                      |
-| `get_trends`      | Get trends               | `category`(trending/for-you/news/sports/entertainment)       |
+| Tool                  | Description                | Parameters                                                   |
+| --------------------- | -------------------------- | ------------------------------------------------------------ |
+| `search_tweets`       | Search tweets by keyword   | `query`, `product`(Top/Latest/Media), `count`                |
+| `get_user_info`       | Get user profile           | `screen_name`                                                |
+| `get_user_tweets`     | Get user's tweets          | `user_id`, `tweet_type`(Tweets/Replies/Media/Likes), `count` |
+| `get_tweet`           | Get a single tweet         | `tweet_id`                                                   |
+| `get_tweet_replies`   | Get replies to a tweet     | `tweet_id`, `count`                                          |
+| `get_timeline`        | Get home timeline          | `count`                                                      |
+| `get_latest_timeline` | Get latest timeline        | `count`                                                      |
+| `get_trends`          | Get trends                 | `category`(trending/for-you/news/sports/entertainment)       |
 
 ## Test
 
