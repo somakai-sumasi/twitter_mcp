@@ -7,7 +7,10 @@ twikit を使った読み取り専用の Twitter MCP Server。Claude Code から
 ```bash
 cd <project-root>
 uv sync
+python scripts/patch_twikit.py
 ```
+
+> **注意:** パッチスクリプトは twikit の既知バグ ([d60/twikit#375](https://github.com/d60/twikit/issues/375)) を修正します。Twitter/X の API レスポンス変更により `get_tweet_by_id()` が `KeyError: 'itemContent'` で失敗する問題を回避します。twikit のアップグレード後も、上流で修正されるまで再実行してください。
 
 ## 認証（cookies.json の準備）
 

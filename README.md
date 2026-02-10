@@ -9,7 +9,10 @@ A read-only Twitter MCP Server using twikit. Retrieve Twitter data from Claude C
 ```bash
 cd <project-root>
 uv sync
+python scripts/patch_twikit.py
 ```
+
+> **Note:** The patch script fixes a known twikit bug ([d60/twikit#375](https://github.com/d60/twikit/issues/375)) where `get_tweet_by_id()` fails with `KeyError: 'itemContent'` due to a Twitter/X API response change. Run it again after upgrading twikit until the issue is resolved upstream.
 
 ## Authentication (cookies.json)
 
