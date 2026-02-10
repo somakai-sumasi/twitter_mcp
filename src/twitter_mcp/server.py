@@ -29,10 +29,18 @@ def _format_tweet(tweet) -> dict:
         "id": tweet.id,
         "text": getattr(tweet, "text", "") or getattr(tweet, "full_text", ""),
         "created_at": getattr(tweet, "created_at", None),
+        "lang": getattr(tweet, "lang", None),
         "favorite_count": getattr(tweet, "favorite_count", 0),
         "retweet_count": getattr(tweet, "retweet_count", 0),
         "reply_count": getattr(tweet, "reply_count", 0),
+        "quote_count": getattr(tweet, "quote_count", 0),
+        "bookmark_count": getattr(tweet, "bookmark_count", 0),
         "view_count": getattr(tweet, "view_count", None),
+        "hashtags": getattr(tweet, "hashtags", []),
+        "urls": getattr(tweet, "urls", []),
+        "in_reply_to": getattr(tweet, "in_reply_to", None),
+        "is_quote_status": getattr(tweet, "is_quote_status", False),
+        "possibly_sensitive": getattr(tweet, "possibly_sensitive", False),
     }
     if hasattr(tweet, "user") and tweet.user:
         result["user"] = {
@@ -40,6 +48,25 @@ def _format_tweet(tweet) -> dict:
             "name": tweet.user.name,
             "screen_name": tweet.user.screen_name,
         }
+    if getattr(tweet, "media", None):
+        result["media"] = [
+            {
+                "type": getattr(m, "type", None),
+                "url": getattr(m, "media_url", None),
+                "expanded_url": getattr(m, "expanded_url", None),
+            }
+            for m in tweet.media
+        ]
+    if getattr(tweet, "quote", None):
+        result["quote"] = _format_tweet(tweet.quote)
+    if getattr(tweet, "retweeted_tweet", None):
+        result["retweeted_tweet"] = _format_tweet(tweet.retweeted_tweet)
+    if getattr(tweet, "poll", None):
+        result["poll"] = str(tweet.poll)
+    if getattr(tweet, "place", None):
+        result["place"] = str(tweet.place)
+    if getattr(tweet, "community_note", None):
+        result["community_note"] = str(tweet.community_note)
     return result
 
 
