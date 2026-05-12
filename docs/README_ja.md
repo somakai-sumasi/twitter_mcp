@@ -10,7 +10,7 @@ uv sync
 python scripts/patch_twikit.py
 ```
 
-> **注意:** パッチスクリプトは twikit の既知バグ ([d60/twikit#375](https://github.com/d60/twikit/issues/375)) を修正します。Twitter/X の API レスポンス変更により `get_tweet_by_id()` が `KeyError: 'itemContent'` で失敗する問題を回避します。twikit のアップグレード後も、上流で修正されるまで再実行してください。
+> **注意:** PyPI の twikit は 2025-02 以降リリースが止まっており、その間に X 側の仕様変更で複数のバグが発生したまま残っています。パッチスクリプトは、upstream に PR は出ているがまだマージされていない以下の修正をローカル適用します: `itemContent` の防御的アクセス ([#375](https://github.com/d60/twikit/issues/375))、`ondemand.s` の新 webpack 形式対応で `X-Client-Transaction-Id` を復活 ([#408](https://github.com/d60/twikit/issues/408)/[#409](https://github.com/d60/twikit/issues/409))、`User` 初期化時の `legacy.*` キー欠落対策、`SearchTimeline` を GET から POST に変更 ([#412](https://github.com/d60/twikit/pull/412)/[#419](https://github.com/d60/twikit/pull/419))。`uv sync` のたびに再実行してください。
 
 ## 認証（cookies.json の準備）
 

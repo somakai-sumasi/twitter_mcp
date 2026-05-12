@@ -12,7 +12,7 @@ uv sync
 python scripts/patch_twikit.py
 ```
 
-> **Note:** The patch script fixes a known twikit bug ([d60/twikit#375](https://github.com/d60/twikit/issues/375)) where `get_tweet_by_id()` fails with `KeyError: 'itemContent'` due to a Twitter/X API response change. Run it again after upgrading twikit until the issue is resolved upstream.
+> **Note:** PyPI's twikit has been unreleased since 2025-02 while X kept changing its responses. The patch script applies the upstream fixes (still unmerged on `d60/twikit`) needed to keep this MCP working: `itemContent` defensive access ([#375](https://github.com/d60/twikit/issues/375)), the new `ondemand.s` webpack format for `X-Client-Transaction-Id` ([#408](https://github.com/d60/twikit/issues/408)/[#409](https://github.com/d60/twikit/issues/409)), `User` `legacy.*` field guards, and switching `SearchTimeline` from GET to POST ([#412](https://github.com/d60/twikit/pull/412)/[#419](https://github.com/d60/twikit/pull/419)). Re-run after each `uv sync` until upstream releases a fix.
 
 ## Authentication (cookies.json)
 
