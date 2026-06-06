@@ -42,7 +42,14 @@ class HermesBackendTests(unittest.IsolatedAsyncioTestCase):
                 "fullText": "Hello from Hermes Tweet",
                 "createdAt": "2026-06-06T00:00:00Z",
                 "author": {"id": "42", "username": "alice", "name": "Alice"},
-                "public_metrics": {"like_count": "7", "retweet_count": 2},
+                "likeCount": "7",
+                "public_metrics": {
+                    "retweetCount": 2,
+                    "replyCount": "3",
+                    "quoteCount": 4,
+                    "bookmarkCount": 5,
+                    "impressionCount": "600",
+                },
                 "mediaObjects": [{"type": "photo", "mediaUrl": "https://example.com/a.jpg"}],
             }
         )
@@ -52,6 +59,10 @@ class HermesBackendTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(normalized["created_at"], "2026-06-06T00:00:00Z")
         self.assertEqual(normalized["favorite_count"], 7)
         self.assertEqual(normalized["retweet_count"], 2)
+        self.assertEqual(normalized["reply_count"], 3)
+        self.assertEqual(normalized["quote_count"], 4)
+        self.assertEqual(normalized["bookmark_count"], 5)
+        self.assertEqual(normalized["view_count"], 600)
         self.assertEqual(normalized["user"]["screen_name"], "alice")
         self.assertEqual(normalized["media"][0]["url"], "https://example.com/a.jpg")
 
