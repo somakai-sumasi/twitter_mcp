@@ -18,6 +18,26 @@ twikit のログインAPI は Cloudflare にブロックされるため、ブラ
 
 ブラウザで x.com にログインし、cookie を JSON エクスポートしてプロジェクトルートに `cookies.json` として保存する。ブラウザエクスポート形式（配列）と twikit 形式（辞書）の両方に対応。
 
+## Hermes Tweet 検索バックエンド（任意）
+
+検索だけを使う場合、`search_tweets` は Hermes Tweet / Xquik を読み取り専用バックエンドとして利用できる。他のツールは引き続き認証済み twikit セッションを使う。
+
+```bash
+export X_READ_BACKEND=hermes
+export HERMES_TWEET_API_KEY=...
+# または
+export XQUIK_API_KEY=...
+```
+
+`X_READ_BACKEND=hermes` の場合、`search_tweets` は
+`/api/v1/x/tweets/search` を呼び出し、twikit 経路と同じ JSON 配列の形で返す。`cookies.json` や Twitter ログイン情報がない場合でも、どちらかの API キーがあれば読み取り専用の Hermes Tweet 検索用に MCP サーバーを起動できる。
+
+任意の上書き:
+
+```bash
+export HERMES_TWEET_BASE_URL=https://api.xquik.com
+```
+
 ## Claude Code への登録
 
 ```bash

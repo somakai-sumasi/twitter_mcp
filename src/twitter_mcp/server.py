@@ -7,8 +7,33 @@ from mcp.server.fastmcp import FastMCP, Context
 from twikit import Client
 
 from twitter_mcp.config import settings
+from twitter_mcp.hermes import (
+    has_hermes_api_key,
+    read_backend,
+    search_hermes_tweets,
+)
 
 COOKIES_PATH = str(Path(__file__).resolve().parent.parent.parent / "cookies.json")
+
+
+def _has_twitter_login_credentials() -> bool:
+    return bool(
+        settings.TWITTER_USERNAME
+        and settings.TWITTER_EMAIL
+        and settings.TWITTER_PASSWORD
+    )
+
+
+def _lifespan_context(ctx: Context) -> dict:
+    request_context = getattr(ctx, "request_context", None)
+    context = getattr(request_context, "lifespan_context", None)
+    return context if isinstance(context, dict) else {}
+
+
+def _should_use_hermes_search(ctx: Context) -> bool:
+    if read_backend() == "hermes":
+        return True
+    return _lifespan_context(ctx).get("client") is None and has_hermes_api_key()
 
 
 def _load_cookies(path: str) -> dict:
@@ -93,14 +118,26 @@ async def lifespan(server):
     client = Client("ja")
     if os.path.exists(COOKIES_PATH):
         client.set_cookies(_load_cookies(COOKIES_PATH))
-    else:
+        yield {"client": client}
+        return
+    if _has_twitter_login_credentials():
         await client.login(
             auth_info_1=settings.TWITTER_USERNAME,
             auth_info_2=settings.TWITTER_EMAIL,
             password=settings.TWITTER_PASSWORD,
         )
         client.save_cookies(COOKIES_PATH)
-    yield {"client": client}
+        yield {"client": client}
+        return
+    if read_backend() == "hermes" or has_hermes_api_key():
+        yield {"client": None}
+        return
+    raise RuntimeError(
+        "Missing Twitter cookies or login credentials. "
+        "Save cookies.json, set TWITTER_USERNAME/TWITTER_EMAIL/TWITTER_PASSWORD, "
+        "or set X_READ_BACKEND=hermes with HERMES_TWEET_API_KEY or XQUIK_API_KEY "
+        "for read-only tweet search."
+    )
 
 
 mcp = FastMCP(
@@ -116,7 +153,13 @@ mcp = FastMCP(
 
 
 def _get_client(ctx: Context) -> Client:
-    return ctx.request_context.lifespan_context["client"]
+    client = _lifespan_context(ctx).get("client")
+    if client is None:
+        raise RuntimeError(
+            "Twitter cookies or login credentials are required for this tool. "
+            "Only search_tweets can use the optional Hermes Tweet backend."
+        )
+    return client
 
 
 @mcp.tool()
@@ -127,6 +170,10 @@ async def search_tweets(
     count: int = 20,
 ) -> str:
     """キーワードでツイートを検索する。productはTop/Latest/Mediaから選択。"""
+    if _should_use_hermes_search(ctx):
+        results = await search_hermes_tweets(query, product, count)
+        return json.dumps(results, ensure_ascii=False, indent=2)
+
     client = _get_client(ctx)
     results = await client.search_tweet(query, product, count=count)
     return json.dumps([_format_tweet(t) for t in results], ensure_ascii=False, indent=2)
