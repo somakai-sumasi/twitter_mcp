@@ -20,6 +20,31 @@ The twikit login API is blocked by Cloudflare, so browser cookies are used inste
 
 Log in to x.com in your browser, export cookies as JSON, and save as `cookies.json` in the project root. Both browser export format (array) and twikit format (dict) are supported.
 
+## Optional Hermes Tweet search backend
+
+`search_tweets` can use Hermes Tweet / Xquik as a read-only search backend when
+you do not want to maintain browser cookies for search-only MCP usage. Other
+tools still use the authenticated twikit session.
+
+```bash
+export X_READ_BACKEND=hermes
+export HERMES_TWEET_API_KEY=...
+# or
+export XQUIK_API_KEY=...
+```
+
+With `X_READ_BACKEND=hermes`, `search_tweets` calls
+`/api/v1/x/tweets/search` and returns the same JSON array shape as the twikit
+path. If no `cookies.json` or Twitter login credentials are available, the MCP
+server can still start for read-only Hermes Tweet search when one of these API
+keys is configured.
+
+Optional override:
+
+```bash
+export HERMES_TWEET_BASE_URL=https://api.xquik.com
+```
+
 ## Register with Claude Code
 
 ```bash
